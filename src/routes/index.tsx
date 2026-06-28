@@ -69,8 +69,10 @@ function Index() {
       <CustomCursor />
       <WeatherCanvas kind={activeKind} isNight={isNight} />
 
-      {/* Soft vignette overlay */}
-      <div className="pointer-events-none fixed inset-0 -z-[5] bg-[radial-gradient(ellipse_at_center,_transparent_40%,_rgba(0,0,0,0.55)_100%)]" />
+      {/* Readability veil over the animated sky */}
+      <div className="pointer-events-none fixed inset-0 -z-[5] bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.35)_0%,_rgba(0,0,0,0.7)_100%)]" />
+      <div className="pointer-events-none fixed inset-x-0 top-0 -z-[4] h-40 bg-gradient-to-b from-black/60 to-transparent" />
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 -z-[4] h-48 bg-gradient-to-t from-black/70 to-transparent" />
 
       {/* Nav */}
       <header className="fixed left-0 right-0 top-0 z-30 flex items-center justify-between px-8 py-6">
