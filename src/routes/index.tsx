@@ -194,9 +194,9 @@ function Index() {
             )}
 
             <div className="mt-24 grid grid-cols-3 gap-12 text-left text-sm text-muted-foreground md:max-w-3xl">
-              <Feature title="Earth pulse" body="A breathing planet that responds to the rhythm of the sky." />
+              <Feature title="Earth pulse" body="The living heartbeat of the planet — a slow breathing orb that beats faster when the sky is wild and slows when the air is calm." />
               <Feature title="Nature soundscape" body="Adaptive ambient layers — rain, forest, wind, distant tide." />
-              <Feature title="Gaia, your guide" body="A soft AI voice that translates weather into feeling." />
+              <Feature title="EarthPulse AI" body="A soft AI voice that translates weather into feeling." />
             </div>
           </motion.section>
         ) : (
