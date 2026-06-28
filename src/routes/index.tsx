@@ -9,9 +9,9 @@ import { fetchWeather, type WeatherKind, type WeatherSnapshot } from "@/lib/weat
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Gaia — Listen to the sky" },
+      { title: "EarthPulse — Listen to the sky" },
       { name: "description", content: "A cinematic, AI-guided weather experience where nature is alive." },
-      { property: "og:title", content: "Gaia — Listen to the sky" },
+      { property: "og:title", content: "EarthPulse — Listen to the sky" },
       { property: "og:description", content: "Nature is speaking. Listen to the sky." },
     ],
   }),
@@ -35,17 +35,20 @@ function Index() {
     return () => clearTimeout(t);
   }, []);
 
+  // Active slice = the time-travel hour the user is viewing
+  const slice = useMemo(() => snap?.hours?.[tod] ?? null, [snap, tod]);
   const isNight = useMemo(() => {
+    if (slice) return !slice.isDay;
     if (tod === 3) return true;
     if (snap && !snap.isDay && tod === 1) return true;
     return false;
-  }, [tod, snap]);
-
+  }, [tod, snap, slice]);
   const activeKind: WeatherKind = useMemo(() => {
+    if (slice) return slice.kind;
     if (isNight) return "night";
     if (!snap) return "clear";
     return snap.kind;
-  }, [snap, isNight]);
+  }, [snap, isNight, slice]);
 
   const search = async (q: string) => {
     const city = q.trim();
@@ -81,7 +84,7 @@ function Index() {
             <span className="absolute inset-0 rounded-full bg-primary/40 blur-md" />
             <span className="relative h-2.5 w-2.5 rounded-full bg-primary" />
           </div>
-          <span className="font-display text-xl tracking-tight">Gaia</span>
+          <span className="font-display text-xl tracking-tight">EarthPulse</span>
         </div>
         <nav className="hidden gap-8 text-sm text-muted-foreground md:flex">
           <a href="#scene" className="hover:text-foreground">Sky</a>
