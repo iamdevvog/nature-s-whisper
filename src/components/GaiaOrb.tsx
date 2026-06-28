@@ -11,7 +11,7 @@ export function GaiaOrb({ snap }: { snap: WeatherSnapshot | null }) {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([
-    { role: "assistant", content: "I am Gaia. Ask me what the air would say." },
+    { role: "assistant", content: "I am EarthPulse. Ask me what the air would say." },
   ]);
   const ask = useServerFn(askGaia);
 
@@ -50,11 +50,16 @@ export function GaiaOrb({ snap }: { snap: WeatherSnapshot | null }) {
         className="fixed bottom-8 right-8 z-40 grid h-20 w-20 place-items-center rounded-full"
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.96 }}
-        aria-label="Talk to Gaia"
+        aria-label="Talk to EarthPulse"
       >
         <span className="absolute inset-0 rounded-full bg-primary/30 blur-2xl breathe" />
         <span className="absolute inset-2 rounded-full bg-gradient-to-br from-primary via-accent to-aurora opacity-90 breathe" />
-        <span className="relative h-3 w-3 rounded-full bg-white shadow-[0_0_20px_white]" />
+        <svg viewBox="0 0 24 24" className="relative h-9 w-9 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="9" opacity="0.4" />
+          <path d="M3 14 Q7 10 12 14 T21 14" />
+          <path d="M3 10 Q7 6 12 10 T21 10" opacity="0.6" />
+          <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+        </svg>
       </motion.button>
 
       <AnimatePresence>
@@ -67,12 +72,16 @@ export function GaiaOrb({ snap }: { snap: WeatherSnapshot | null }) {
             className="glass fixed bottom-32 right-8 z-40 flex h-[28rem] w-[22rem] flex-col overflow-hidden rounded-3xl"
           >
             <div className="flex items-center gap-3 border-b border-border/60 px-5 py-4">
-              <span className="relative grid h-8 w-8 place-items-center">
+              <span className="relative grid h-9 w-9 place-items-center">
                 <span className="absolute inset-0 rounded-full bg-primary/40 blur-lg" />
-                <span className="relative h-3 w-3 rounded-full bg-primary" />
+                <svg viewBox="0 0 24 24" className="relative h-6 w-6 text-primary" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="9" opacity="0.5" />
+                  <path d="M3 14 Q7 10 12 14 T21 14" />
+                  <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                </svg>
               </span>
               <div>
-                <p className="font-display text-base leading-none">Gaia</p>
+                <p className="font-display text-base leading-none">EarthPulse</p>
                 <p className="text-xs text-muted-foreground">the voice of nature</p>
               </div>
             </div>
@@ -90,7 +99,7 @@ export function GaiaOrb({ snap }: { snap: WeatherSnapshot | null }) {
                   </span>
                 </div>
               ))}
-              {busy && <div className="text-muted-foreground italic">Gaia is listening to the wind…</div>}
+              {busy && <div className="text-muted-foreground italic">EarthPulse is listening to the wind…</div>}
             </div>
             <div className="flex flex-wrap gap-1.5 px-4 pb-2">
               {quick.map((q) => (

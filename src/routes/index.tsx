@@ -9,9 +9,9 @@ import { fetchWeather, type WeatherKind, type WeatherSnapshot } from "@/lib/weat
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Gaia — Listen to the sky" },
+      { title: "EarthPulse — Listen to the sky" },
       { name: "description", content: "A cinematic, AI-guided weather experience where nature is alive." },
-      { property: "og:title", content: "Gaia — Listen to the sky" },
+      { property: "og:title", content: "EarthPulse — Listen to the sky" },
       { property: "og:description", content: "Nature is speaking. Listen to the sky." },
     ],
   }),
@@ -35,17 +35,20 @@ function Index() {
     return () => clearTimeout(t);
   }, []);
 
+  // Active slice = the time-travel hour the user is viewing
+  const slice = useMemo(() => snap?.hours?.[tod] ?? null, [snap, tod]);
   const isNight = useMemo(() => {
+    if (slice) return !slice.isDay;
     if (tod === 3) return true;
     if (snap && !snap.isDay && tod === 1) return true;
     return false;
-  }, [tod, snap]);
-
+  }, [tod, snap, slice]);
   const activeKind: WeatherKind = useMemo(() => {
+    if (slice) return slice.kind;
     if (isNight) return "night";
     if (!snap) return "clear";
     return snap.kind;
-  }, [snap, isNight]);
+  }, [snap, isNight, slice]);
 
   const search = async (q: string) => {
     const city = q.trim();
@@ -81,7 +84,7 @@ function Index() {
             <span className="absolute inset-0 rounded-full bg-primary/40 blur-md" />
             <span className="relative h-2.5 w-2.5 rounded-full bg-primary" />
           </div>
-          <span className="font-display text-xl tracking-tight">Gaia</span>
+          <span className="font-display text-xl tracking-tight">EarthPulse</span>
         </div>
         <nav className="hidden gap-8 text-sm text-muted-foreground md:flex">
           <a href="#scene" className="hover:text-foreground">Sky</a>
@@ -191,9 +194,9 @@ function Index() {
             )}
 
             <div className="mt-24 grid grid-cols-3 gap-12 text-left text-sm text-muted-foreground md:max-w-3xl">
-              <Feature title="Earth pulse" body="A breathing planet that responds to the rhythm of the sky." />
+              <Feature title="Earth pulse" body="The living heartbeat of the planet — a slow breathing orb that beats faster when the sky is wild and slows when the air is calm." />
               <Feature title="Nature soundscape" body="Adaptive ambient layers — rain, forest, wind, distant tide." />
-              <Feature title="Gaia, your guide" body="A soft AI voice that translates weather into feeling." />
+              <Feature title="EarthPulse AI" body="A soft AI voice that translates weather into feeling." />
             </div>
           </motion.section>
         ) : (
@@ -228,6 +231,11 @@ function Scene({
   setTod: (n: number) => void;
 }) {
   const todLabel = ["Morning", "Afternoon", "Evening", "Night"][tod] ?? "Now";
+  const slice = snap.hours?.[tod];
+  const tempC = slice?.tempC ?? snap.tempC;
+  const feelsLikeC = slice?.feelsLikeC ?? snap.feelsLikeC;
+  const description = slice?.description ?? snap.description;
+  const activeKind = slice?.kind ?? snap.kind;
 
   return (
     <motion.section
@@ -255,12 +263,18 @@ function Scene({
           </p>
 
           <div className="mt-10 flex items-baseline gap-6">
-            <span className="font-display text-7xl font-light">
-              {Math.round(snap.tempC)}°
-            </span>
+            <motion.span
+              key={`${tod}-${Math.round(tempC)}`}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="font-display text-7xl font-light"
+            >
+              {Math.round(tempC)}°
+            </motion.span>
             <div className="text-sm text-muted-foreground">
-              <p>feels like {Math.round(snap.feelsLikeC)}°</p>
-              <p className="capitalize">{snap.description}</p>
+              <p>feels like {Math.round(feelsLikeC)}°</p>
+              <p className="capitalize">{description}</p>
             </div>
           </div>
 
@@ -304,7 +318,11 @@ function Scene({
               <div className="absolute h-40 w-40 rounded-full border border-primary/30" />
               <div className="absolute h-52 w-52 rounded-full border border-primary/10" />
             </div>
-            <p className="mt-2 text-center text-xs text-muted-foreground">
+            <p className="mt-3 text-center text-xs leading-relaxed text-muted-foreground">
+              The living heartbeat of {snap.city} — it beats faster on wild days,
+              slower when the air is still.
+            </p>
+            <p className="mt-1 text-center text-[10px] text-muted-foreground/70">
               {snap.lat.toFixed(2)}°, {snap.lon.toFixed(2)}°
             </p>
           </div>
@@ -322,7 +340,7 @@ function Scene({
         <div id="memory" className="glass rounded-3xl p-8">
           <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Save this moment</p>
           <p className="mt-4 text-foreground/90">
-            “The {kindLabel(snap.kind)} {snap.isDay ? "afternoon" : "evening"} in {snap.city}.”
+            “The {kindLabel(activeKind)} {todLabel.toLowerCase()} in {snap.city}.”
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
             Keep this weather like a postcard you can return to.

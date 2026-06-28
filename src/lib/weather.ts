@@ -26,6 +26,17 @@ export type WeatherSnapshot = {
     sun: string;
     sky: string;
   };
+  hours: HourSlice[]; // [morning, afternoon, evening, night]
+};
+
+export type HourSlice = {
+  label: "Morning" | "Afternoon" | "Evening" | "Night";
+  tempC: number;
+  feelsLikeC: number;
+  code: number;
+  isDay: boolean;
+  kind: WeatherKind;
+  description: string;
 };
 
 // WMO weather interpretation codes -> kind
@@ -102,7 +113,7 @@ export function poeticSky(kind: WeatherKind) {
   }
 }
 
-export function poeticOverall(snap: Omit<WeatherSnapshot, "poetry" | "mood">): string {
+export function poeticOverall(snap: Omit<WeatherSnapshot, "poetry" | "mood" | "hours">): string {
   const k = snap.kind;
   const place = snap.city;
   switch (k) {
@@ -128,13 +139,48 @@ export async function geocodeCity(query: string) {
 
 export async function fetchWeather(city: string): Promise<WeatherSnapshot> {
   const geo = await geocodeCity(city);
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${geo.lat}&longitude=${geo.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,wind_speed_10m,uv_index&wind_speed_unit=kmh&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${geo.lat}&longitude=${geo.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,wind_speed_10m,uv_index&hourly=temperature_2m,apparent_temperature,weather_code,is_day&forecast_days=2&wind_speed_unit=kmh&timezone=auto`;
   const res = await fetch(url);
   if (!res.ok) throw new Error("The sky did not answer.");
   const j = await res.json();
   const c = j.current;
   const isDay = c.is_day === 1;
   const kind = codeToKind(c.weather_code, isDay);
+
+  // Pick hours nearest 8 / 14 / 19 / 23 from current local time forward
+  const targets: { label: HourSlice["label"]; hour: number }[] = [
+    { label: "Morning", hour: 8 },
+    { label: "Afternoon", hour: 14 },
+    { label: "Evening", hour: 19 },
+    { label: "Night", hour: 23 },
+  ];
+  const times: string[] = j.hourly?.time ?? [];
+  const hTemp: number[] = j.hourly?.temperature_2m ?? [];
+  const hFeel: number[] = j.hourly?.apparent_temperature ?? [];
+  const hCode: number[] = j.hourly?.weather_code ?? [];
+  const hDay: number[] = j.hourly?.is_day ?? [];
+  const nowIdx = Math.max(0, times.findIndex((t) => t === c.time));
+  const hours: HourSlice[] = targets.map(({ label, hour }) => {
+    let bestIdx = nowIdx;
+    let bestDiff = 99;
+    for (let i = nowIdx; i < Math.min(times.length, nowIdx + 24); i++) {
+      const h = new Date(times[i]).getHours();
+      const d = Math.abs(h - hour);
+      if (d < bestDiff) { bestDiff = d; bestIdx = i; }
+    }
+    const day = (hDay[bestIdx] ?? 1) === 1;
+    const code = hCode[bestIdx] ?? c.weather_code;
+    return {
+      label,
+      tempC: hTemp[bestIdx] ?? c.temperature_2m,
+      feelsLikeC: hFeel[bestIdx] ?? c.apparent_temperature,
+      code,
+      isDay: day,
+      kind: codeToKind(code, day),
+      description: codeToText(code),
+    };
+  });
+
   const base = {
     city: geo.name,
     country: geo.country,
@@ -162,6 +208,7 @@ export async function fetchWeather(city: string): Promise<WeatherSnapshot> {
       sun: poeticSun(base.uvIndex, isDay),
       sky: poeticSky(kind),
     },
+    hours,
   };
   return snap;
 }
