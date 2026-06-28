@@ -113,7 +113,7 @@ export function poeticSky(kind: WeatherKind) {
   }
 }
 
-export function poeticOverall(snap: Omit<WeatherSnapshot, "poetry" | "mood">): string {
+export function poeticOverall(snap: Omit<WeatherSnapshot, "poetry" | "mood" | "hours">): string {
   const k = snap.kind;
   const place = snap.city;
   switch (k) {
