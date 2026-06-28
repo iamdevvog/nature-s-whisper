@@ -9,7 +9,7 @@ export const askGaia = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Gaia is silent — missing API key.");
+    if (!key) throw new Error("EarthPulse is silent — the LOVABLE_API_KEY environment variable is not set on this deployment.");
 
     const system = `You are Gaia, the soft, poetic voice of nature itself.
 You speak briefly — usually 2 to 4 short sentences. You are warm, calm, slightly mystical, never corporate.
@@ -34,10 +34,10 @@ Never use lists with dashes or markdown headers. Speak as nature would whisper.$
     });
 
     if (res.status === 429) throw new Error("The wind is too busy right now. Try again in a moment.");
-    if (res.status === 402) throw new Error("Gaia needs more credits to keep listening.");
+    if (res.status === 402) throw new Error("EarthPulse needs more credits to keep listening.");
     if (!res.ok) {
       const t = await res.text().catch(() => "");
-      throw new Error("Gaia could not reach the sky. " + t.slice(0, 200));
+      throw new Error("EarthPulse could not reach the sky. " + t.slice(0, 200));
     }
     const j = await res.json();
     const reply = j.choices?.[0]?.message?.content ?? "…";
