@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const SUGGESTIONS = ["Kyoto", "Reykjavík", "London", "Lisbon", "Marrakech", "Banff"];
+const SUGGESTIONS = ["Mumbai", "Delhi", "Bengaluru", "Jaipur", "Shimla", "Kochi"];
 
 function Index() {
   const [query, setQuery] = useState("");
@@ -236,6 +236,15 @@ function Scene({
   const feelsLikeC = slice?.feelsLikeC ?? snap.feelsLikeC;
   const description = slice?.description ?? snap.description;
   const activeKind = slice?.kind ?? snap.kind;
+  const [saved, setSaved] = useState(false);
+  const [memories, setMemories] = useState<Array<{ city: string; kind: WeatherKind; tod: string; tempC: number; at: number }>>([]);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("earthpulse.memories");
+      if (raw) setMemories(JSON.parse(raw));
+    } catch {}
+  }, []);
 
   return (
     <motion.section
@@ -347,15 +356,41 @@ function Scene({
           </p>
           <button
             onClick={() => {
-              const key = "gaia.memories";
-              const prev = JSON.parse(localStorage.getItem(key) ?? "[]");
-              prev.push({ city: snap.city, kind: snap.kind, at: Date.now() });
-              localStorage.setItem(key, JSON.stringify(prev));
+              try {
+                const key = "earthpulse.memories";
+                const prev = JSON.parse(localStorage.getItem(key) ?? "[]");
+                const entry = {
+                  city: snap.city,
+                  kind: activeKind,
+                  tod: todLabel,
+                  tempC: Math.round(tempC),
+                  at: Date.now(),
+                };
+                const next = [entry, ...prev].slice(0, 12);
+                localStorage.setItem(key, JSON.stringify(next));
+                setMemories(next);
+                setSaved(true);
+                setTimeout(() => setSaved(false), 2200);
+              } catch (e) {
+                console.error("Could not save moment", e);
+              }
             }}
-            className="mt-6 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground"
+            className="mt-6 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
           >
-            Keep this moment
+            {saved ? "Kept ✨" : "Keep this moment"}
           </button>
+          {memories.length > 0 && (
+            <ul className="mt-6 space-y-2 border-t border-border/40 pt-4 text-xs text-muted-foreground">
+              {memories.slice(0, 4).map((m) => (
+                <li key={m.at} className="flex items-center justify-between gap-3">
+                  <span className="truncate">
+                    {m.tod} in {m.city} · {m.tempC}° · <span className="capitalize">{m.kind}</span>
+                  </span>
+                  <span className="shrink-0 opacity-60">{new Date(m.at).toLocaleDateString()}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 
