@@ -231,6 +231,11 @@ function Scene({
   setTod: (n: number) => void;
 }) {
   const todLabel = ["Morning", "Afternoon", "Evening", "Night"][tod] ?? "Now";
+  const slice = snap.hours?.[tod];
+  const tempC = slice?.tempC ?? snap.tempC;
+  const feelsLikeC = slice?.feelsLikeC ?? snap.feelsLikeC;
+  const description = slice?.description ?? snap.description;
+  const activeKind = slice?.kind ?? snap.kind;
 
   return (
     <motion.section
@@ -258,12 +263,18 @@ function Scene({
           </p>
 
           <div className="mt-10 flex items-baseline gap-6">
-            <span className="font-display text-7xl font-light">
-              {Math.round(snap.tempC)}°
-            </span>
+            <motion.span
+              key={`${tod}-${Math.round(tempC)}`}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="font-display text-7xl font-light"
+            >
+              {Math.round(tempC)}°
+            </motion.span>
             <div className="text-sm text-muted-foreground">
-              <p>feels like {Math.round(snap.feelsLikeC)}°</p>
-              <p className="capitalize">{snap.description}</p>
+              <p>feels like {Math.round(feelsLikeC)}°</p>
+              <p className="capitalize">{description}</p>
             </div>
           </div>
 
@@ -307,7 +318,11 @@ function Scene({
               <div className="absolute h-40 w-40 rounded-full border border-primary/30" />
               <div className="absolute h-52 w-52 rounded-full border border-primary/10" />
             </div>
-            <p className="mt-2 text-center text-xs text-muted-foreground">
+            <p className="mt-3 text-center text-xs leading-relaxed text-muted-foreground">
+              The living heartbeat of {snap.city} — it beats faster on wild days,
+              slower when the air is still.
+            </p>
+            <p className="mt-1 text-center text-[10px] text-muted-foreground/70">
               {snap.lat.toFixed(2)}°, {snap.lon.toFixed(2)}°
             </p>
           </div>
@@ -325,7 +340,7 @@ function Scene({
         <div id="memory" className="glass rounded-3xl p-8">
           <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Save this moment</p>
           <p className="mt-4 text-foreground/90">
-            “The {kindLabel(snap.kind)} {snap.isDay ? "afternoon" : "evening"} in {snap.city}.”
+            “The {kindLabel(activeKind)} {todLabel.toLowerCase()} in {snap.city}.”
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
             Keep this weather like a postcard you can return to.
