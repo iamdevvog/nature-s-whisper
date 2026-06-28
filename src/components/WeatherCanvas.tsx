@@ -270,7 +270,7 @@ export function WeatherCanvas({ kind, isNight }: Props) {
       // Configure particles per weather
       let targetSize = 6, targetMode = 0, targetOpacityClouds = 0.0, gravity = -0.2;
       let starOpacity = 0;
-      const speedMul = (() => {
+      const speedMul: number = (() => {
         switch (k) {
           case "rain": targetSize = 3; targetMode = 1; targetOpacityClouds = 0.5; gravity = -1.4; return 1;
           case "storm": targetSize = 3.5; targetMode = 1; targetOpacityClouds = 0.7; gravity = -2.0; return 1;
@@ -280,6 +280,7 @@ export function WeatherCanvas({ kind, isNight }: Props) {
           case "clear": targetSize = 5; targetMode = 0; targetOpacityClouds = 0.15; gravity = -0.05; return 1;
           case "night": targetSize = 4; targetMode = 0; targetOpacityClouds = 0.2; gravity = -0.05; return 1;
         }
+        return 1;
       })();
       if (night) starOpacity = 0.95;
 
